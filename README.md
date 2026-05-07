@@ -69,3 +69,32 @@ In your C++ code, the "Main Loop" would likely look like a series of **Cases**:
 3. **Case BOIL:** Run heater at 80% power. Start hop timers.
 
 Do you plan on using a physical button to "advance" through these stages, or do you want the Nano to handle the transitions automatically based on the timers?
+
+
+//
+
+To keep this manageable for a Nano's memory, we'll use a **State Machine** approach. This allows the Nano to "know" if it is currently Mashing, Boiling, or Cooling, and act accordingly without getting stuck.
+
+I’ve included a simple **PID-style logic** for the heater and a **timer** for the pump.
+
+### Arduino Nano Brewing Controller
+
+`brew1.c`
+
+---
+
+### Key Features of this Code:
+
+* **The Enum (States):** Instead of a long list of `if` statements, the `switch(currentState)` block makes the code clean. It ensures the heater doesn't accidentally turn on while you are cooling the beer.
+* **Hysteresis (Temperature Buffer):** In the `maintainTemp` function, I added a **0.5°C buffer**. This prevents the SSR from "flickering" rapidly when the temperature is exactly at 65.0°C, which extends the life of your hardware.
+* **Non-Blocking Logic:** By using `millis()` for the timer instead of `delay()`, the Nano stays responsive. It can still check the temperature and listen for Serial commands while the timer is running.
+
+### Implementation Tips:
+
+1. **Safety:** Ensure your **DS18B20** is the waterproof version (the one in the stainless steel tube).
+2. **Calibration:** Test this with a pot of plain water first! You want to see how much "thermal coasting" you have (where the temp keeps rising even after the heater turns off).
+3. **Expansion:** If you add an I2C LCD screen later, you would put the `lcd.print` commands inside the `loop` to show the live data.
+
+Would you like to add a physical "Emergency Stop" button to the code, or are you comfortable using the Serial monitor to control it?
+
+
